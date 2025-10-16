@@ -1,4 +1,4 @@
-// src/App.tsx (Versão Final Corrigida)
+// src/App.tsx
 
 import { useState, useEffect } from "react";
 import { InventoryTable, InventoryItem } from "./components/InventoryTable";
@@ -33,7 +33,7 @@ type ViewType =
   | "suggestions"
   | "settings";
 
-// Função Helper segura para mapear dados da API
+// Função Helper
 const mapProdutoToInventoryItem = (produto: Produto): InventoryItem => {
   return {
     id_item: produto.id,
@@ -68,6 +68,7 @@ export default function App() {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [dataError, setDataError] = useState<string | null>(null);
   const [email, setEmail] = useState('admin@nexum.com');
+  // A senha continua aqui no estado, mas o campo não será mostrado na tela
   const [senha, setSenha] = useState('Admin@123');
   const [activeView, setActiveView] = useState<ViewType>("inventory");
   const [searchTerm, setSearchTerm] = useState("");
@@ -84,7 +85,7 @@ export default function App() {
       localStorage.setItem('authToken', data.token);
       setToken(data.token);
     } catch (error: any) {
-      console.error("Erro detalhado do login:", error);
+      console.error("Erro detalhado do login:", error); 
       setLoginError(error.message);
     } finally {
       setLoading(false);
@@ -136,7 +137,9 @@ export default function App() {
     }
   };
 
-  // Tela de Login
+  // ======================================================================
+  // ================= TELA DE LOGIN SIMPLIFICADA =========================
+  // ======================================================================
   if (!token) {
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
@@ -146,6 +149,7 @@ export default function App() {
                     <h1 className="text-3xl font-bold text-gray-900">NEXUM</h1>
                     <p className="text-gray-500 mt-2">Acesse seu painel de controle</p>
                 </div>
+                
                 <form onSubmit={handleLogin} className="space-y-4">
                     <div>
                         <Label htmlFor="email">Usuário</Label>
@@ -153,11 +157,15 @@ export default function App() {
                             id="email"
                             type="email"
                             value={email}
-                            readOnly
+                            readOnly // O usuário não precisa editar
                             className="bg-gray-100 h-10 cursor-not-allowed"
                         />
                     </div>
+                    
+                    {/* O campo de senha foi removido da tela */}
+
                     {loginError && <p className="text-sm text-red-600 pt-1">{loginError}</p>}
+                    
                     <Button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 h-10 text-base font-semibold">
                         {loading ? 'Verificando...' : 'Entrar'}
                     </Button>
@@ -167,7 +175,7 @@ export default function App() {
     );
   }
 
-  // Dashboard Principal
+  // Renderização Principal (Dashboard)
   return (
     <div className="flex items-center justify-center w-full min-h-screen bg-gray-200 p-4 lg:p-8">
         <div className="w-full max-w-7xl h-[90vh] flex bg-gray-50 rounded-xl shadow-2xl border border-gray-300 overflow-hidden">
