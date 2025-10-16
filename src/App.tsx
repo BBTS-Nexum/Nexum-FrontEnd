@@ -169,18 +169,24 @@ export default function App() {
   }, [token]); // Roda sempre que o token mudar
 
 
-  // Filtrar dados
-  const filteredData = inventoryData.filter((item) => {
+const filteredData = inventoryData.filter((item) => {
+    // Adicionamos uma verificação para garantir que o 'item' existe antes de continuar
+    if (!item) {
+        return false;
+    }
+
     const matchesSearch =
-      item.descricao_item.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.codigo_item.toLowerCase().includes(searchTerm.toLowerCase());
+      (item.descricao_item || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.codigo_item || '').toLowerCase().includes(searchTerm.toLowerCase());
+
     const matchesCategory =
       categoryFilter === "all" || item.categoria === categoryFilter;
+      
     const matchesStatus =
       statusFilter === "all" || item.status_critico === statusFilter;
+      
     return matchesSearch && matchesCategory && matchesStatus;
-  });
-
+});
   // Estatísticas (já existentes)
   const totalItems = inventoryData.length;
   const criticalItems = inventoryData.filter(
