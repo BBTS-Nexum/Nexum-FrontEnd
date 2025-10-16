@@ -80,7 +80,7 @@ const mapProdutoToInventoryItem = (produto: Produto): InventoryItem => {
     cobertura_em_dias: produto.cobertura,
     previsao_reposicao: "A definir",
     quantidade_ideal_compra: 0,
-    status_critico: produto.status.toLowerCase() as InventoryItem['status_critico'],
+    status_critico: (produto.status || '').toLowerCase() as InventoryItem['status_critico'],
     localizacao_estoque: produto.localizacao,
     em_transito: produto.em_transito,
     reservado: produto.reservado,
