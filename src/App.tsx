@@ -142,66 +142,52 @@ export default function App() {
   };
 
   // ======================================================================
-  // ====================== NOVA TELA DE LOGIN ============================
+  // ================= TELA DE LOGIN CENTRALIZADA =========================
   // ======================================================================
   if (!token) {
     return (
-      <div className="w-full min-h-screen grid lg:grid-cols-2">
-        {/* Painel Esquerdo (Branding) */}
-        <div className="hidden lg:flex flex-col items-center justify-center bg-blue-900 text-white p-12 text-center">
-            <Package className="w-24 h-24 text-blue-300 mb-6" />
-            <h1 className="text-5xl font-bold">NEXUM</h1>
-            <p className="mt-4 text-lg text-blue-200">
-                Inteligência e controle para sua cadeia de suprimentos.
-            </p>
-        </div>
-        
-        {/* Painel Direito (Formulário) */}
-        <div className="flex items-center justify-center bg-gray-50 p-8">
-          <div className="w-full max-w-md">
-            <div className="text-center lg:hidden mb-8">
-                <Package className="w-16 h-16 text-blue-800 mx-auto mb-4" />
-                <h1 className="text-3xl font-bold text-gray-900">NEXUM</h1>
+        <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
+            <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg border border-gray-200">
+                <div className="text-center">
+                    <Package className="w-16 h-16 text-blue-600 mx-auto mb-4" />
+                    <h1 className="text-3xl font-bold text-gray-900">NEXUM</h1>
+                    <p className="text-gray-500 mt-2">Acesse seu painel de controle</p>
+                </div>
+                
+                <form onSubmit={handleLogin} className="space-y-4">
+                    <div>
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                            id="email"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            placeholder="seuemail@exemplo.com"
+                            className="bg-gray-50 h-10"
+                        />
+                    </div>
+                    <div>
+                        <Label htmlFor="password">Senha</Label>
+                        <Input
+                            id="password"
+                            type="password"
+                            value={senha}
+                            onChange={(e) => setSenha(e.target.value)}
+                            required
+                            placeholder="Sua senha"
+                            className="bg-gray-50 h-10"
+                        />
+                    </div>
+
+                    {loginError && <p className="text-sm text-red-600 pt-1">{loginError}</p>}
+                    
+                    <Button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 h-10 text-base font-semibold">
+                        {loading ? 'Entrando...' : 'Entrar'}
+                    </Button>
+                </form>
             </div>
-            
-            <h2 className="text-2xl font-semibold text-gray-800 mb-2">Bem-vindo de volta!</h2>
-            <p className="text-gray-500 mb-6">Insira suas credenciais para acessar o painel.</p>
-
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="seuemail@exemplo.com"
-                  className="bg-white"
-                />
-              </div>
-              <div>
-                <Label htmlFor="password">Senha</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={senha}
-                  onChange={(e) => setSenha(e.target.value)}
-                  required
-                  placeholder="Sua senha"
-                  className="bg-white"
-                />
-              </div>
-
-              {loginError && <p className="text-sm text-red-600 pt-1">{loginError}</p>}
-              
-              <Button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 h-10 text-base">
-                {loading ? 'Entrando...' : 'Entrar'}
-              </Button>
-            </form>
-          </div>
         </div>
-      </div>
     );
   }
 
