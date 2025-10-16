@@ -67,29 +67,28 @@ type ViewType =
 const mapProdutoToInventoryItem = (produto: Produto): InventoryItem => {
   return {
     id_item: produto.id,
-    codigo_item: produto.codigo,
-    descricao_item: produto.descricao,
-    categoria: produto.tipo, // Ajuste se os nomes forem diferentes
-    unidade_medida: produto.unidade_medida,
-    estoque_atual: produto.saldo_total,
-    estoque_minimo: 50, // A API não parece ter esse dado, defina um padrão
-    estoque_maximo: 200, // A API não parece ter esse dado, defina um padrão
-    consumo_medio_mensal: produto.cmm,
-    consumo_ultimo_mes: 0, // A API não parece ter esse dado, defina um padrão
-    consumo_tendencia: 'estavel', // Lógica para definir isso pode ser adicionada
-    cobertura_em_dias: produto.cobertura,
+    codigo_item: produto.codigo || '', // Garante que seja uma string
+    descricao_item: produto.descricao || '', // Garante que seja uma string
+    categoria: produto.tipo || '', // Garante que seja uma string
+    unidade_medida: produto.unidade_medida || '',
+    estoque_atual: produto.saldo_total || 0,
+    estoque_minimo: 50, 
+    estoque_maximo: 200,
+    consumo_medio_mensal: produto.cmm || 0,
+    consumo_ultimo_mes: 0,
+    consumo_tendencia: 'estavel',
+    cobertura_em_dias: produto.cobertura || 0,
     previsao_reposicao: "A definir",
     quantidade_ideal_compra: 0,
-    status_critico: (produto.status || '').toLowerCase() as InventoryItem['status_critico'],
-    localizacao_estoque: produto.localizacao,
-    em_transito: produto.em_transito,
-    reservado: produto.reservado,
+    status_critico: (produto.status || 'normal').toLowerCase() as InventoryItem['status_critico'],
+    localizacao_estoque: produto.localizacao || '',
+    em_transito: produto.em_transito || 0,
+    reservado: produto.reservado || 0,
     data_ultima_compra: "A definir",
-    preco_medio_unitario: produto.preco_medio,
-    fornecedor_principal: produto.fornecedor_principal,
+    preco_medio_unitario: produto.preco_medio || 0,
+    fornecedor_principal: produto.fornecedor_principal || '',
   };
 };
-
 
 export default function App() {
   // 2. ESTADOS DE AUTENTICAÇÃO E DADOS
