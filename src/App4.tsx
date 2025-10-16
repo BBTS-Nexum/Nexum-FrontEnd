@@ -1,12 +1,8 @@
 import { useState } from "react";
 import { InventoryTable } from "./components/InventoryTable";
 import { ChatAssistant } from "./components/ChatAssistant";
-import { PurchaseRequests } from "./components/PurchaseRequests";
-import { PurchaseHistory } from "./components/PurchaseHistory";
-import { PurchaseSuggestions } from "./components/PurchaseSuggestions";
-import { Settings as SettingsComponent } from "./components/Settings"; // componente renomeado
+import { Settings as SettingsComponent } from "./components/Settings";
 import { mockInventoryData } from "./components/mockData";
-import { InventoryItem } from "./components/InventoryTable";
 import { Input } from "./components/ui/input";
 import { Button } from "./components/ui/button";
 import { Badge } from "./components/ui/badge";
@@ -27,24 +23,22 @@ import {
 import { Label } from "./components/ui/label";
 import {
   Package,
-  Search,
-  Download,
-  Filter,
-  Settings as SettingsIcon, // ícone renomeado para evitar colisão
-  ShoppingCart,
   History,
-  Lightbulb,
-  TrendingUp,
-  AlertCircle,
-  Plus,
+  Users,
+  Truck,
+  FileWarning,
   LogOut,
   ChevronLeft,
   ChevronRight,
+  Settings as SettingsIcon,
+  Download,
+  Filter,
+  Plus,
+  AlertCircle,
+  TrendingUp,
 } from "lucide-react";
 
-// Adicionar tipos para evitar erros de compilação TS
-/* using InventoryItem from ./components/InventoryTable */
-
+type InventoryItem = import("./components/InventoryTable").InventoryItem;
 type NewItem = {
   codigo: string;
   descricao: string;
@@ -56,13 +50,18 @@ type NewItem = {
 
 type ViewType =
   | "inventory"
-  | "purchase-requests"
   | "purchase-history"
-  | "suggestions"
+  | "suppliers"
+  | "delivery-status"
+  | "occurrences"
   | "settings";
 
-export default function App() {
+export default function App4() {
   const [activeView, setActiveView] = useState<ViewType>("inventory");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isChatCollapsed, setIsChatCollapsed] = useState(false);
+
+  // Estoque states
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -70,8 +69,6 @@ export default function App() {
     (mockInventoryData as InventoryItem[]) || []
   );
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isChatCollapsed, setIsChatCollapsed] = useState(false);
   const [newItem, setNewItem] = useState<NewItem>({
     codigo: "",
     descricao: "",
@@ -120,7 +117,6 @@ export default function App() {
   };
 
   const handleCreateItem = () => {
-    // safe next id (fallback para 1 se inventário vazio)
     const nextId =
       inventoryData && inventoryData.length > 0
         ? Math.max(...inventoryData.map((i) => i.id_item)) + 1
@@ -141,11 +137,11 @@ export default function App() {
       estoque_maximo: estoqueMinimo * 3,
       consumo_medio_mensal: 100,
       consumo_ultimo_mes: 100,
-      consumo_tendencia: "estavel" as const,
+      consumo_tendencia: "estavel",
       cobertura_em_dias: 30,
       previsao_reposicao: "2025-11-30",
       quantidade_ideal_compra: 200,
-      status_critico: "normal" as const,
+      status_critico: "normal",
       localizacao_estoque: "A-01-1",
       em_transito: 0,
       reservado: 0,
@@ -176,9 +172,7 @@ export default function App() {
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
       <aside
-        className={`${
-          isSidebarCollapsed ? "w-16" : "w-64"
-        } bg-blue-900 text-white flex flex-col transition-all duration-300 relative`}
+        className={`${isSidebarCollapsed ? "w-16" : "w-64"} bg-blue-900 text-white flex flex-col transition-all duration-300 relative`}
       >
         <div className="p-6 border-b border-blue-800">
           <div className="flex items-center gap-3">
@@ -186,7 +180,7 @@ export default function App() {
             {!isSidebarCollapsed && (
               <div>
                 <h1 className="text-xl">NEXUM</h1>
-                <p className="text-blue-300 text-sm">Planejador</p>
+                <p className="text-blue-300 text-sm">Gestor</p>
               </div>
             )}
           </div>
@@ -197,11 +191,7 @@ export default function App() {
           onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           className="absolute -right-3 top-20 bg-blue-800 hover:bg-blue-700 text-white rounded-full p-1 shadow-lg transition-colors z-10"
         >
-          {isSidebarCollapsed ? (
-            <ChevronRight className="w-5 h-5" />
-          ) : (
-            <ChevronLeft className="w-5 h-5" />
-          )}
+          {isSidebarCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
         </button>
 
         <nav className="flex-1 p-4 space-y-2">
@@ -210,56 +200,64 @@ export default function App() {
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors w-full ${
               isSidebarCollapsed ? "justify-center" : "text-left"
             } ${
-              activeView === "inventory"
-                ? "bg-blue-800 text-white"
-                : "hover:bg-blue-800 text-blue-100"
+              activeView === "inventory" ? "bg-blue-800 text-white" : "hover:bg-blue-800 text-blue-100"
             }`}
-            title={isSidebarCollapsed ? "Estoque Completo" : ""}
+            title={isSidebarCollapsed ? "Estoque" : ""}
           >
             <Package className="w-5 h-5 flex-shrink-0" />
-            {!isSidebarCollapsed && <span>Estoque Completo</span>}
+            {!isSidebarCollapsed && <span>Estoque</span>}
           </button>
-          <button
-            onClick={() => setActiveView("purchase-requests")}
-            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors w-full ${
-              isSidebarCollapsed ? "justify-center" : "text-left"
-            } ${
-              activeView === "purchase-requests"
-                ? "bg-blue-800 text-white"
-                : "hover:bg-blue-800 text-blue-100"
-            }`}
-            title={isSidebarCollapsed ? "Requisições de Compras" : ""}
-          >
-            <ShoppingCart className="w-5 h-5 flex-shrink-0" />
-            {!isSidebarCollapsed && <span>Requisições de Compras</span>}
-          </button>
+
           <button
             onClick={() => setActiveView("purchase-history")}
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors w-full ${
               isSidebarCollapsed ? "justify-center" : "text-left"
             } ${
-              activeView === "purchase-history"
-                ? "bg-blue-800 text-white"
-                : "hover:bg-blue-800 text-blue-100"
+              activeView === "purchase-history" ? "bg-blue-800 text-white" : "hover:bg-blue-800 text-blue-100"
             }`}
             title={isSidebarCollapsed ? "Histórico de Compras" : ""}
           >
             <History className="w-5 h-5 flex-shrink-0" />
             {!isSidebarCollapsed && <span>Histórico de Compras</span>}
           </button>
+
           <button
-            onClick={() => setActiveView("suggestions")}
+            onClick={() => setActiveView("suppliers")}
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors w-full ${
               isSidebarCollapsed ? "justify-center" : "text-left"
             } ${
-              activeView === "suggestions"
-                ? "bg-blue-800 text-white"
-                : "hover:bg-blue-800 text-blue-100"
+              activeView === "suppliers" ? "bg-blue-800 text-white" : "hover:bg-blue-800 text-blue-100"
             }`}
-            title={isSidebarCollapsed ? "Sugestões de Compras" : ""}
+            title={isSidebarCollapsed ? "Fornecedores" : ""}
           >
-            <Lightbulb className="w-5 h-5 flex-shrink-0" />
-            {!isSidebarCollapsed && <span>Sugestões de Compras</span>}
+            <Users className="w-5 h-5 flex-shrink-0" />
+            {!isSidebarCollapsed && <span>Fornecedores</span>}
+          </button>
+
+          <button
+            onClick={() => setActiveView("delivery-status")}
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors w-full ${
+              isSidebarCollapsed ? "justify-center" : "text-left"
+            } ${
+              activeView === "delivery-status" ? "bg-blue-800 text-white" : "hover:bg-blue-800 text-blue-100"
+            }`}
+            title={isSidebarCollapsed ? "Situação de Entregas" : ""}
+          >
+            <Truck className="w-5 h-5 flex-shrink-0" />
+            {!isSidebarCollapsed && <span>Situação de Entregas</span>}
+          </button>
+
+          <button
+            onClick={() => setActiveView("occurrences")}
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors w-full ${
+              isSidebarCollapsed ? "justify-center" : "text-left"
+            } ${
+              activeView === "occurrences" ? "bg-blue-800 text-white" : "hover:bg-blue-800 text-blue-100"
+            }`}
+            title={isSidebarCollapsed ? "Ocorrências" : ""}
+          >
+            <FileWarning className="w-5 h-5 flex-shrink-0" />
+            {!isSidebarCollapsed && <span>Ocorrências</span>}
           </button>
         </nav>
 
@@ -269,14 +267,11 @@ export default function App() {
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors w-full ${
               isSidebarCollapsed ? "justify-center" : "text-left"
             } ${
-              activeView === "settings"
-                ? "bg-blue-800 text-white"
-                : "hover:bg-blue-800 text-blue-100"
+              activeView === "settings" ? "bg-blue-800 text-white" : "hover:bg-blue-800 text-blue-100"
             }`}
             title={isSidebarCollapsed ? "Configurações" : ""}
           >
-            <SettingsIcon className="w-5 h-5 flex-shrink-0" />{" "}
-            {/* use o ícone renomeado */}
+            <SettingsIcon className="w-5 h-5 flex-shrink-0" />
             {!isSidebarCollapsed && <span>Configurações</span>}
           </button>
           <button
@@ -300,22 +295,15 @@ export default function App() {
             <header className="bg-white border-b border-gray-200 px-8 py-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl text-gray-900">
-                    Gerenciamento de Estoque
-                  </h2>
-                  <p className="text-gray-500">
-                    Controle completo do inventário e análise de consumo
-                  </p>
+                  <h2 className="text-2xl text-gray-900">Gerenciamento de Estoque</h2>
+                  <p className="text-gray-500">Controle completo do inventário e análise de consumo</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <Button variant="outline" className="gap-2">
                     <Download className="w-4 h-4" />
                     Exportar
                   </Button>
-                  <Button
-                    onClick={handleAddItem}
-                    className="gap-2 bg-blue-600 hover:bg-blue-700"
-                  >
+                  <Button onClick={handleAddItem} className="gap-2 bg-blue-600 hover:bg-blue-700">
                     <Plus className="w-4 h-4" />
                     Novo Item
                   </Button>
@@ -360,9 +348,7 @@ export default function App() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-green-100 text-sm">Valor Total</p>
-                      <p className="text-3xl mt-1">
-                        R$ {(totalValue / 1000).toFixed(1)}k
-                      </p>
+                      <p className="text-3xl mt-1">R$ {(totalValue / 1000).toFixed(1)}k</p>
                     </div>
                     <TrendingUp className="w-10 h-10 text-green-200" />
                   </div>
@@ -374,7 +360,7 @@ export default function App() {
             <div className="px-8 py-6 bg-gray-50">
               <div className="flex items-center gap-4">
                 <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" /></svg>
                   <Input
                     placeholder="Buscar por descrição ou código..."
                     value={searchTerm}
@@ -383,35 +369,22 @@ export default function App() {
                   />
                 </div>
 
-                <Select
-                  value={categoryFilter}
-                  onValueChange={setCategoryFilter}
-                >
+                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                   <SelectTrigger className="w-[220px] bg-white">
                     <SelectValue placeholder="Categoria" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todas Categorias</SelectItem>
-                    <SelectItem value="Componentes Eletrônicos">
-                      Componentes Eletrônicos
-                    </SelectItem>
-                    <SelectItem value="Materiais Base">
-                      Materiais Base
-                    </SelectItem>
+                    <SelectItem value="Componentes Eletrônicos">Componentes Eletrônicos</SelectItem>
+                    <SelectItem value="Materiais Base">Materiais Base</SelectItem>
                     <SelectItem value="Ferragens">Ferragens</SelectItem>
                     <SelectItem value="Cabos e Fios">Cabos e Fios</SelectItem>
-                    <SelectItem value="Circuitos Integrados">
-                      Circuitos Integrados
-                    </SelectItem>
+                    <SelectItem value="Circuitos Integrados">Circuitos Integrados</SelectItem>
                     <SelectItem value="Embalagens">Embalagens</SelectItem>
-                    <SelectItem value="Fontes e Energia">
-                      Fontes e Energia
-                    </SelectItem>
+                    <SelectItem value="Fontes e Energia">Fontes e Energia</SelectItem>
                     <SelectItem value="Conectores">Conectores</SelectItem>
                     <SelectItem value="Sensores">Sensores</SelectItem>
-                    <SelectItem value="Materiais Auxiliares">
-                      Materiais Auxiliares
-                    </SelectItem>
+                    <SelectItem value="Materiais Auxiliares">Materiais Auxiliares</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -434,36 +407,19 @@ export default function App() {
                 </Button>
               </div>
 
-              {/* Active Filters */}
               {(categoryFilter !== "all" || statusFilter !== "all") && (
                 <div className="flex items-center gap-2 mt-4">
                   <span className="text-sm text-gray-600">Filtros ativos:</span>
                   {categoryFilter !== "all" && (
-                    <Badge
-                      variant="secondary"
-                      className="gap-1 bg-blue-100 text-blue-700"
-                    >
+                    <Badge variant="secondary" className="gap-1 bg-blue-100 text-blue-700">
                       Categoria: {categoryFilter}
-                      <button
-                        onClick={() => setCategoryFilter("all")}
-                        className="ml-1 hover:text-blue-900"
-                      >
-                        ×
-                      </button>
+                      <button onClick={() => setCategoryFilter("all")} className="ml-1 hover:text-blue-900">×</button>
                     </Badge>
                   )}
                   {statusFilter !== "all" && (
-                    <Badge
-                      variant="secondary"
-                      className="gap-1 bg-blue-100 text-blue-700"
-                    >
+                    <Badge variant="secondary" className="gap-1 bg-blue-100 text-blue-700">
                       Status: {statusFilter}
-                      <button
-                        onClick={() => setStatusFilter("all")}
-                        className="ml-1 hover:text-blue-900"
-                      >
-                        ×
-                      </button>
+                      <button onClick={() => setStatusFilter("all")} className="ml-1 hover:text-blue-900">×</button>
                     </Badge>
                   )}
                 </div>
@@ -472,30 +428,36 @@ export default function App() {
 
             {/* Table */}
             <div className="flex-1 px-8 pb-8 overflow-auto">
-              <InventoryTable
-                data={filteredData}
-                onAddItem={handleAddItem}
-                onRemoveItem={handleRemoveItem}
-              />
+              <InventoryTable data={filteredData} onAddItem={handleAddItem} onRemoveItem={handleRemoveItem} />
             </div>
           </>
         )}
 
-        {activeView === "purchase-requests" && (
-          <div className="flex-1 overflow-auto px-8 py-6">
-            <PurchaseRequests />
-          </div>
-        )}
-
         {activeView === "purchase-history" && (
           <div className="flex-1 overflow-auto px-8 py-6">
-            <PurchaseHistory />
+            <div className="text-xl font-semibold mb-4">Histórico de Compras</div>
+            <div className="bg-white p-6 rounded shadow">(Funcionalidade de histórico de compras aqui)</div>
           </div>
         )}
 
-        {activeView === "suggestions" && (
+        {activeView === "suppliers" && (
           <div className="flex-1 overflow-auto px-8 py-6">
-            <PurchaseSuggestions />
+            <div className="text-xl font-semibold mb-4">Fornecedores</div>
+            <div className="bg-white p-6 rounded shadow">(Funcionalidade de fornecedores aqui)</div>
+          </div>
+        )}
+
+        {activeView === "delivery-status" && (
+          <div className="flex-1 overflow-auto px-8 py-6">
+            <div className="text-xl font-semibold mb-4">Situação de Entregas</div>
+            <div className="bg-white p-6 rounded shadow">(Funcionalidade de situação de entregas aqui)</div>
+          </div>
+        )}
+
+        {activeView === "occurrences" && (
+          <div className="flex-1 overflow-auto px-8 py-6">
+            <div className="text-xl font-semibold mb-4">Ocorrências</div>
+            <div className="bg-white p-6 rounded shadow">(Funcionalidade de ocorrências aqui)</div>
           </div>
         )}
 
@@ -507,11 +469,8 @@ export default function App() {
       </main>
 
       {/* Chat Assistant */}
-      {!isChatCollapsed && (
-        <ChatAssistant onToggle={() => setIsChatCollapsed(true)} />
-      )}
+      {!isChatCollapsed && <ChatAssistant onToggle={() => setIsChatCollapsed(true)} />}
 
-      {/* Chat Collapsed Button */}
       {isChatCollapsed && (
         <button
           onClick={() => setIsChatCollapsed(false)}
@@ -526,9 +485,7 @@ export default function App() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Adicionar Novo Item</DialogTitle>
-            <DialogDescription>
-              Cadastrar um novo item no inventário
-            </DialogDescription>
+            <DialogDescription>Cadastrar um novo item no inventário</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
@@ -536,9 +493,7 @@ export default function App() {
               <Input
                 id="codigo"
                 value={newItem.codigo}
-                onChange={(e) =>
-                  setNewItem({ ...newItem, codigo: e.target.value })
-                }
+                onChange={(e) => setNewItem({ ...newItem, codigo: e.target.value })}
                 placeholder="Ex: MT-2024-999"
               />
             </div>
@@ -547,27 +502,18 @@ export default function App() {
               <Input
                 id="descricao"
                 value={newItem.descricao}
-                onChange={(e) =>
-                  setNewItem({ ...newItem, descricao: e.target.value })
-                }
+                onChange={(e) => setNewItem({ ...newItem, descricao: e.target.value })}
                 placeholder="Ex: Resistor 10K Ohm"
               />
             </div>
             <div>
               <Label htmlFor="categoria">Categoria</Label>
-              <Select
-                value={newItem.categoria}
-                onValueChange={(value: string) =>
-                  setNewItem({ ...newItem, categoria: value })
-                }
-              >
+              <Select value={newItem.categoria} onValueChange={(value: string) => setNewItem({ ...newItem, categoria: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione uma categoria" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Componentes Eletrônicos">
-                    Componentes Eletrônicos
-                  </SelectItem>
+                  <SelectItem value="Componentes Eletrônicos">Componentes Eletrônicos</SelectItem>
                   <SelectItem value="Materiais Base">Materiais Base</SelectItem>
                   <SelectItem value="Ferragens">Ferragens</SelectItem>
                   <SelectItem value="Cabos e Fios">Cabos e Fios</SelectItem>
@@ -576,47 +522,17 @@ export default function App() {
             </div>
             <div>
               <Label htmlFor="estoque">Estoque Atual</Label>
-              <Input
-                id="estoque"
-                type="number"
-                value={newItem.estoque_atual}
-                onChange={(e) =>
-                  setNewItem({ ...newItem, estoque_atual: e.target.value })
-                }
-                placeholder="Ex: 1000"
-              />
+              <Input id="estoque" type="number" value={newItem.estoque_atual} onChange={(e) => setNewItem({ ...newItem, estoque_atual: e.target.value })} placeholder="Ex: 1000" />
             </div>
             <div>
               <Label htmlFor="minimo">Estoque Mínimo</Label>
-              <Input
-                id="minimo"
-                type="number"
-                value={newItem.estoque_minimo}
-                onChange={(e) =>
-                  setNewItem({ ...newItem, estoque_minimo: e.target.value })
-                }
-                placeholder="Ex: 500"
-              />
+              <Input id="minimo" type="number" value={newItem.estoque_minimo} onChange={(e) => setNewItem({ ...newItem, estoque_minimo: e.target.value })} placeholder="Ex: 500" />
             </div>
             <div>
               <Label htmlFor="preco">Preço Unitário (R$)</Label>
-              <Input
-                id="preco"
-                type="number"
-                step="0.01"
-                value={newItem.preco}
-                onChange={(e) =>
-                  setNewItem({ ...newItem, preco: e.target.value })
-                }
-                placeholder="Ex: 0.15"
-              />
+              <Input id="preco" type="number" step="0.01" value={newItem.preco} onChange={(e) => setNewItem({ ...newItem, preco: e.target.value })} placeholder="Ex: 0.15" />
             </div>
-            <Button
-              onClick={handleCreateItem}
-              className="w-full bg-blue-600 hover:bg-blue-700"
-            >
-              Adicionar Item
-            </Button>
+            <Button onClick={handleCreateItem} className="w-full bg-blue-600 hover:bg-blue-700">Adicionar Item</Button>
           </div>
         </DialogContent>
       </Dialog>
