@@ -1,56 +1,40 @@
-import { Badge } from "./ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
-import { SupplierContract } from "./mockSupplierContracts";
+import React from "react";
 
-interface SupplierContractsTableProps {
-  data: SupplierContract[];
-}
-
-export function SupplierContractsTable({ data }: SupplierContractsTableProps) {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "vigente":
-        return "bg-green-500 text-white";
-      case "vencendo":
-        return "bg-yellow-500 text-white";
-      case "vencido":
-        return "bg-red-500 text-white";
-      default:
-        return "bg-gray-400 text-white";
-    }
-  };
-
+// Removed duplicate SupplierContractsTable implementation
+export function SupplierContractsTable({ data }: { data: any[] }) {
   return (
-    <div className="rounded-lg border border-blue-200 bg-white overflow-hidden mt-8">
-      <div className="p-4 font-semibold text-lg text-blue-900">Contratos de Fornecedores</div>
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-blue-600 hover:bg-blue-600">
-              <TableHead className="text-white">Fornecedor</TableHead>
-              <TableHead className="text-white">Contrato</TableHead>
-              <TableHead className="text-white">Objeto</TableHead>
-              <TableHead className="text-white">Validade</TableHead>
-              <TableHead className="text-white">Status</TableHead>
-              <TableHead className="text-white">Valor (R$)</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.map((contract) => (
-              <TableRow key={contract.id}>
-                <TableCell>{contract.fornecedor}</TableCell>
-                <TableCell>{contract.numeroContrato}</TableCell>
-                <TableCell>{contract.objeto}</TableCell>
-                <TableCell>{contract.validade}</TableCell>
-                <TableCell>
-                  <Badge className={getStatusColor(contract.status)}>{contract.status}</Badge>
-                </TableCell>
-                <TableCell>R$ {contract.valor.toLocaleString("pt-BR")}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
+    <table className="w-full text-left table-auto">
+      <thead className="bg-blue-50 text-blue-700">
+        <tr>
+          <th className="px-3 py-2">Fornecedor</th>
+          <th className="px-3 py-2">Contrato</th>
+          <th className="px-3 py-2">Validade</th>
+          <th className="px-3 py-2">Status</th>
+          <th className="px-3 py-2">Valor (R$)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {data && data.length > 0 ? (
+          data.map((c) => (
+            <tr key={c.id} className="border-t">
+              <td className="px-3 py-2">{c.fornecedor}</td>
+              <td className="px-3 py-2">{c.numeroContrato}</td>
+              <td className="px-3 py-2">{c.validade}</td>
+              <td className="px-3 py-2">{c.status}</td>
+              <td className="px-3 py-2">{c.valor.toLocaleString()}</td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td colSpan={5} className="px-3 py-6 text-center text-gray-500">
+              Nenhum contrato encontrado
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
   );
 }
+
+export default SupplierContractsTable;
+// Removed duplicate SupplierContractsTable implementation

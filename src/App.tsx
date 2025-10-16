@@ -6,6 +6,7 @@ import { PurchaseHistory } from "./components/PurchaseHistory";
 import { PurchaseSuggestions } from "./components/PurchaseSuggestions";
 import { Settings as SettingsComponent } from "./components/Settings"; // componente renomeado
 import { mockInventoryData } from "./components/mockData";
+import { InventoryItem } from "./components/InventoryTable";
 import { Input } from "./components/ui/input";
 import { Button } from "./components/ui/button";
 import { Badge } from "./components/ui/badge";
@@ -42,29 +43,7 @@ import {
 } from "lucide-react";
 
 // Adicionar tipos para evitar erros de compilação TS
-type InventoryItem = {
-  id_item: number;
-  codigo_item: string;
-  descricao_item: string;
-  categoria: string;
-  unidade_medida: string;
-  estoque_atual: number;
-  estoque_minimo: number;
-  estoque_maximo: number;
-  consumo_medio_mensal: number;
-  consumo_ultimo_mes: number;
-  consumo_tendencia: string;
-  cobertura_em_dias: number;
-  previsao_reposicao: string;
-  quantidade_ideal_compra: number;
-  status_critico: string;
-  localizacao_estoque: string;
-  em_transito: number;
-  reservado: number;
-  data_ultima_compra: string;
-  preco_medio_unitario: number;
-  fornecedor_principal: string;
-};
+/* using InventoryItem from ./components/InventoryTable */
 
 type NewItem = {
   codigo: string;
@@ -578,7 +557,7 @@ export default function App() {
               <Label htmlFor="categoria">Categoria</Label>
               <Select
                 value={newItem.categoria}
-                onValueChange={(value) =>
+                onValueChange={(value: string) =>
                   setNewItem({ ...newItem, categoria: value })
                 }
               >
