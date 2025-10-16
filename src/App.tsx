@@ -120,7 +120,7 @@ export default function App() {
       try {
         // ATENÇÃO: O token agora está fixo no código.
         // O ideal é pegar um token válido do seu backend e colocar aqui.
-        const adminToken = "https://nexum-back-end.vercel.app/"; 
+        const adminToken = "AEIOU1234@"; 
         
         if (!adminToken || adminToken === "SEU_TOKEN_DE_ADMIN_AQUI") {
             console.error("TOKEN NÃO CONFIGURADO: Por favor, adicione um token de teste válido.");
