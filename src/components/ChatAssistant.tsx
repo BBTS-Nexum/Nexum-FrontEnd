@@ -1,11 +1,7 @@
-// src/components/ChatAssistant.tsx
-
 import { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, Sparkles, ChevronRight } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { gerarPlanoDeCompra } from "../services/aiAgentService"; // Importe o agente
-import { InventoryItem } from "./InventoryTable"; // Importe o tipo
 
 interface Message {
   id: string;
@@ -16,28 +12,18 @@ interface Message {
 
 interface ChatAssistantProps {
   onToggle: () => void;
-  inventoryData: InventoryItem[]; // Recebe os dados do inventário
 }
 
-// Interface para o plano de compra que a IA retorna
-interface PurchasePlanItem {
-    codigo: string;
-    acao_sugerida: string;
-    quantidade_acao: number;
-    justificativa_curta: string;
-}
-
-export function ChatAssistant({ onToggle, inventoryData }: ChatAssistantProps) {
+export function ChatAssistant({ onToggle }: ChatAssistantProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
       role: "assistant",
-      content: "Olá! Sou o assistente de IA da NEXUM. Digite 'gerar plano de compras' para receber sugestões de aquisição.",
+      content: "Olá! Sou o assistente de IA do NEXUM. Posso ajudá-lo com análises de estoque, previsões de compra e sugestões de otimização. Como posso ajudar?",
       timestamp: new Date(),
     },
   ]);
   const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -46,8 +32,8 @@ export function ChatAssistant({ onToggle, inventoryData }: ChatAssistantProps) {
     }
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  const handleSend = () => {
+    if (!input.trim()) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -58,59 +44,46 @@ export function ChatAssistant({ onToggle, inventoryData }: ChatAssistantProps) {
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
-    setIsLoading(true);
-    
-    const aiResponse = await generateAIResponse(input);
-    const assistantMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      role: "assistant",
-      content: aiResponse,
-      timestamp: new Date(),
-    };
-    setMessages((prev) => [...prev, assistantMessage]);
-    setIsLoading(false);
+
+    // Simular resposta da IA
+    setTimeout(() => {
+      const aiResponse = generateAIResponse(input);
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: aiResponse,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
+    }, 1000);
   };
 
-  const generateAIResponse = async (userInput: string): Promise<string> => {
+  const generateAIResponse = (userInput: string): string => {
     const lowerInput = userInput.toLowerCase();
 
-    if (lowerInput.includes("gerar plano de compras")) {
-      try {
-        const plan = await gerarPlanoDeCompra(inventoryData);
-
-        if (plan.erro) {
-            return `Ocorreu um erro ao contatar o Agente de IA: ${plan.erro}`;
-        }
-        
-        if (plan.mensagem) {
-          return plan.mensagem;
-        }
-
-        let formattedResponse = "✅ Plano de Compras Gerado pelo Agente de IA:\n\n";
-        (plan as PurchasePlanItem[]).forEach(item => {
-            formattedResponse += `Código: ${item.codigo}\n`;
-            formattedResponse += `  Ação: ${item.acao_sugerida}\n`;
-            if (item.quantidade_acao > 0) {
-                formattedResponse += `  Quantidade: ${item.quantidade_acao}\n`;
-            }
-            formattedResponse += `  Justificativa: ${item.justificativa_curta}\n\n`;
-        });
-        return formattedResponse;
-
-      } catch (error: any) {
-        console.error("Erro ao chamar o serviço do agente:", error);
-        return `Não foi possível processar a solicitação: ${error.message}`;
-      }
+    if (lowerInput.includes("crítico") || lowerInput.includes("critico")) {
+      return "Atualmente temos 2 itens em status crítico:\n\n• Resistor 10K Ohm - Apenas 16 dias de cobertura\n• Cabo Flexível 0.5mm² - Apenas 14 dias de cobertura\n\nRecomendo criar requisições de compra urgentes para estes itens.";
     }
 
-    if (lowerInput.includes("crítico")) {
-      return "Para uma análise detalhada e sugestões, digite 'gerar plano de compras'.";
+    if (lowerInput.includes("compra") || lowerInput.includes("requisição") || lowerInput.includes("requisicao")) {
+      return "Baseado na análise preditiva, sugiro as seguintes compras prioritárias:\n\n1. Resistor 10K Ohm - Qtd: 1.000 un\n2. Cabo Flexível - Qtd: 1.000 m\n3. LED Vermelho - Qtd: 1.000 un\n\nTotal estimado: R$ 1.650,00\nTempo de cobertura após compra: 90-120 dias";
     }
 
-    return "Entendi sua pergunta. Para gerar um plano de ação, digite 'gerar plano de compras'.";
+    if (lowerInput.includes("estoque") || lowerInput.includes("inventário") || lowerInput.includes("inventario")) {
+      return "Resumo do inventário:\n\n• Total de itens: 12\n• Itens críticos: 2\n• Itens requerendo atenção: 3\n• Valor total: R$ 42.8k\n• Cobertura média: 68 dias\n\nO estoque está 83% dentro dos parâmetros ideais.";
+    }
+
+    if (lowerInput.includes("previsão") || lowerInput.includes("previsao") || lowerInput.includes("tendência") || lowerInput.includes("tendencia")) {
+      return "Análise de tendências:\n\n📈 Em alta: Resistores, Cabos, Sensores\n📊 Estável: Capacitores, PCBs, Conectores\n📉 Em baixa: LEDs, Transformadores\n\nRecomendo ajustar os estoques mínimos dos itens em alta.";
+    }
+
+    if (lowerInput.includes("economia") || lowerInput.includes("economizar") || lowerInput.includes("reduzir")) {
+      return "Oportunidades de economia identificadas:\n\n1. PCB 10x15cm está com excesso - Economize R$ 4.500 reduzindo próximo pedido\n2. Conectores DB9 têm 138 dias de cobertura - Pode postergar compra em 2 meses\n\nEconomia potencial: R$ 5.200";
+    }
+
+    return "Entendi sua pergunta. Posso ajudá-lo com:\n\n• Análise de itens críticos\n• Previsões de compra\n• Sugestões de economia\n• Tendências de consumo\n• Otimização de estoque\n\nO que você gostaria de saber?";
   };
-  
-  // O resto do seu componente JSX continua aqui (sem alterações)
+
   return (
     <div className="w-80 bg-white border-l border-gray-200 flex flex-col h-full relative">
       {/* Header */}
@@ -123,7 +96,7 @@ export function ChatAssistant({ onToggle, inventoryData }: ChatAssistantProps) {
             </div>
             <div>
               <h3 className="font-semibold">Assistente IA</h3>
-              <p className="text-xs text-blue-100">{isLoading ? "Processando..." : "Online"}</p>
+              <p className="text-xs text-blue-100">Online</p>
             </div>
           </div>
           <button
@@ -199,13 +172,11 @@ export function ChatAssistant({ onToggle, inventoryData }: ChatAssistantProps) {
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && handleSend()}
             className="flex-1"
-            disabled={isLoading}
           />
           <Button
             onClick={handleSend}
             size="icon"
             className="bg-blue-600 hover:bg-blue-700"
-            disabled={isLoading}
           >
             <Send className="w-4 h-4" />
           </Button>
