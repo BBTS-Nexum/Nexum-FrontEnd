@@ -118,13 +118,15 @@ export default function App() {
       setLoading(true);
       setDataError(null);
       try {
-        // ATENÇÃO: O token agora está fixo no código.
-        // O ideal é pegar um token válido do seu backend e colocar aqui.
-        const adminToken = "AEIOU1234@"; 
+        // ===================================================================
+        // ATENÇÃO: COLOQUE SEU TOKEN DE AUTENTICAÇÃO VÁLIDO AQUI
+        // ===================================================================
+        const adminToken = "SEU_TOKEN_DE_ADMIN_AQUI"; 
         
         if (!adminToken || adminToken === "SEU_TOKEN_DE_ADMIN_AQUI") {
-            console.error("TOKEN NÃO CONFIGURADO: Por favor, adicione um token de teste válido.");
+            console.error("TOKEN NÃO CONFIGURADO: Por favor, adicione um token de teste válido em App.tsx.");
             setDataError("Erro de configuração: Token de administrador não foi definido.");
+            setLoading(false);
             return;
         }
 
@@ -139,7 +141,7 @@ export default function App() {
     };
     
     fetchProducts();
-  }, []); // O array vazio [] faz com que isso rode apenas uma vez, quando o componente é montado.
+  }, []); // O array vazio [] faz com que isso rode apenas uma vez
 
 
   // Filtrar dados
@@ -202,7 +204,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* Collapse Button */}
         <button
           onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           className="absolute -right-3 top-20 bg-blue-800 hover:bg-blue-700 text-white rounded-full p-1 shadow-lg transition-colors z-10"
@@ -322,11 +323,74 @@ export default function App() {
             </header>
 
             <div className="px-8 py-6 bg-white border-b border-gray-200">
-              {/* Stats Cards */}
+              <div className="grid grid-cols-4 gap-6">
+                  <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-5 text-white">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-blue-100 text-sm">Total de Itens</p>
+                        <p className="text-3xl mt-1">{totalItems}</p>
+                      </div>
+                      <Package className="w-10 h-10 text-blue-200" />
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-lg p-5 text-white">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-red-100 text-sm">Itens Críticos</p>
+                        <p className="text-3xl mt-1">{criticalItems}</p>
+                      </div>
+                      <AlertCircle className="w-10 h-10 text-red-200" />
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg p-5 text-white">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-yellow-100 text-sm">Requer Atenção</p>
+                        <p className="text-3xl mt-1">{attentionItems}</p>
+                      </div>
+                      <AlertCircle className="w-10 h-10 text-yellow-200" />
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-5 text-white">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-green-100 text-sm">Valor Total</p>
+                        <p className="text-3xl mt-1">R$ {(totalValue / 1000).toFixed(1)}k</p>
+                      </div>
+                      <TrendingUp className="w-10 h-10 text-green-200" />
+                    </div>
+                  </div>
+              </div>
             </div>
 
             <div className="px-8 py-6 bg-gray-50">
-                {/* Filters */}
+              <div className="flex items-center gap-4">
+                  <div className="flex-1 relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Input placeholder="Buscar por descrição ou código..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10 bg-white" />
+                  </div>
+                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                      <SelectTrigger className="w-[220px] bg-white"><SelectValue placeholder="Categoria" /></SelectTrigger>
+                      <SelectContent>
+                          <SelectItem value="all">Todas Categorias</SelectItem>
+                          {/* Adicione outras categorias dinamicamente se necessário */}
+                      </SelectContent>
+                  </Select>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <SelectTrigger className="w-[180px] bg-white"><SelectValue placeholder="Status" /></SelectTrigger>
+                      <SelectContent>
+                          <SelectItem value="all">Todos Status</SelectItem>
+                          <SelectItem value="critico">Crítico</SelectItem>
+                          <SelectItem value="atencao">Atenção</SelectItem>
+                          <SelectItem value="normal">Normal</SelectItem>
+                          <SelectItem value="excesso">Excesso</SelectItem>
+                      </SelectContent>
+                  </Select>
+                  <Button variant="outline" className="gap-2"><Filter className="w-4 h-4" />Mais Filtros</Button>
+              </div>
             </div>
 
             <div className="flex-1 px-8 pb-8 overflow-auto">
@@ -360,7 +424,7 @@ export default function App() {
         )}
       </main>
       
-      {!isChatCollapsed && <ChatAssistant onToggle={() => setIsChatCollapsed(true)} />}
+      {!isChatCollapsed && <ChatAssistant onToggle={() => setIsChatCollapsed(true)} inventoryData={inventoryData} />}
 
       {isChatCollapsed && (
         <button onClick={() => setIsChatCollapsed(false)} className="fixed right-0 top-1/2 -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-6 rounded-l-lg shadow-lg transition-colors z-10">
