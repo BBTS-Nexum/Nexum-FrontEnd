@@ -301,7 +301,7 @@ export default function App4() {
                 <div className="flex items-center gap-3">
                   <Button variant="outline" className="gap-2">
                     <Download className="w-4 h-4" />
-                    Exportar
+                    Importar
                   </Button>
                   <Button onClick={handleAddItem} className="gap-2 bg-blue-600 hover:bg-blue-700">
                     <Plus className="w-4 h-4" />

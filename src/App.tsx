@@ -310,7 +310,7 @@ export default function App() {
                 <div className="flex items-center gap-3">
                   <Button variant="outline" className="gap-2">
                     <Download className="w-4 h-4" />
-                    Exportar
+                    Importar
                   </Button>
                   <Button
                     onClick={handleAddItem}
