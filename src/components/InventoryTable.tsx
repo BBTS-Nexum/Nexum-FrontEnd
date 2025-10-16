@@ -32,8 +32,6 @@ export interface InventoryItem {
   data_ultima_compra: string;
   preco_medio_unitario: number;
   fornecedor_principal: string;
-  item_pai?: string;
-  item_filho?: string;
   observacoes?: string;
 }
 
@@ -99,8 +97,6 @@ export function InventoryTable({ data, onAddItem, onRemoveItem }: InventoryTable
               <TableHead className="text-white min-w-[150px]">Última Compra</TableHead>
               <TableHead className="text-white min-w-[140px]">Preço Médio</TableHead>
               <TableHead className="text-white min-w-[200px]">Fornecedor</TableHead>
-              <TableHead className="text-white min-w-[120px]">Item Pai</TableHead>
-              <TableHead className="text-white min-w-[120px]">Item Filho</TableHead>
               <TableHead className="text-white min-w-[250px]">Observações</TableHead>
               <TableHead className="text-white min-w-[120px]">Ações</TableHead>
             </TableRow>
@@ -153,8 +149,6 @@ export function InventoryTable({ data, onAddItem, onRemoveItem }: InventoryTable
                 <TableCell>{item.data_ultima_compra}</TableCell>
                 <TableCell>R$ {item.preco_medio_unitario.toFixed(2)}</TableCell>
                 <TableCell>{item.fornecedor_principal}</TableCell>
-                <TableCell>{item.item_pai || "-"}</TableCell>
-                <TableCell>{item.item_filho || "-"}</TableCell>
                 <TableCell className="text-gray-600">{item.observacoes || "-"}</TableCell>
                 <TableCell>
                   <div className="flex gap-2">
