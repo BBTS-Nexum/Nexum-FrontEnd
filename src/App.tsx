@@ -9,37 +9,19 @@ import { PurchaseSuggestions } from "./components/PurchaseSuggestions";
 import { Settings as SettingsComponent } from "./components/Settings";
 import { Input } from "./components/ui/input";
 import { Button } from "./components/ui/button";
-import { Badge } from "./components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "./components/ui/dialog";
 import { Label } from "./components/ui/label";
 import {
   Package,
-  Search,
-  Download,
-  Filter,
   Settings as SettingsIcon,
   ShoppingCart,
   History,
   Lightbulb,
-  TrendingUp,
-  AlertCircle,
-  Plus,
   LogOut,
   ChevronLeft,
   ChevronRight,
+  Search,
+  Download,
+  Plus,
 } from "lucide-react";
 import { login, getProducts, Produto } from "./services/apiService";
 
@@ -60,10 +42,10 @@ const mapProdutoToInventoryItem = (produto: Produto): InventoryItem => {
     categoria: produto.tipo || 'Não definida',
     unidade_medida: produto.unidade_medida || 'UN',
     estoque_atual: produto.saldo_total || 0,
-    estoque_minimo: 50, // Padrão
-    estoque_maximo: 200, // Padrão
+    estoque_minimo: 50,
+    estoque_maximo: 200,
     consumo_medio_mensal: produto.cmm || 0,
-    consumo_ultimo_mes: 0, // Padrão
+    consumo_ultimo_mes: 0,
     consumo_tendencia: 'estavel',
     cobertura_em_dias: produto.cobertura || 0,
     previsao_reposicao: "A definir",
@@ -86,13 +68,11 @@ export default function App() {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [dataError, setDataError] = useState<string | null>(null);
 
-  // Estados de UI e Formulários
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
+  // Estados de UI e Formulários com dados de login pré-preenchidos
+  const [email, setEmail] = useState('admin@nexum.com');
+  const [senha, setSenha] = useState('Admin@123');
   const [activeView, setActiveView] = useState<ViewType>("inventory");
   const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isChatCollapsed, setIsChatCollapsed] = useState(false);
 
@@ -151,9 +131,7 @@ export default function App() {
     const matchesSearch =
       (item.descricao_item || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (item.codigo_item || '').toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = categoryFilter === "all" || item.categoria === categoryFilter;
-    const matchesStatus = statusFilter === "all" || item.status_critico === statusFilter;
-    return matchesSearch && matchesCategory && matchesStatus;
+    return matchesSearch;
   });
 
   const handleAddItem = () => alert("Funcionalidade a ser implementada.");
@@ -163,29 +141,65 @@ export default function App() {
     }
   };
 
-  // Renderização condicional: Tela de Login
+  // ======================================================================
+  // ====================== NOVA TELA DE LOGIN ============================
+  // ======================================================================
   if (!token) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-100">
-        <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900">NEXUM</h1>
-            <p className="text-gray-500">Faça login para continuar</p>
+      <div className="w-full min-h-screen grid lg:grid-cols-2">
+        {/* Painel Esquerdo (Branding) */}
+        <div className="hidden lg:flex flex-col items-center justify-center bg-blue-900 text-white p-12 text-center">
+            <Package className="w-24 h-24 text-blue-300 mb-6" />
+            <h1 className="text-5xl font-bold">NEXUM</h1>
+            <p className="mt-4 text-lg text-blue-200">
+                Inteligência e controle para sua cadeia de suprimentos.
+            </p>
+        </div>
+        
+        {/* Painel Direito (Formulário) */}
+        <div className="flex items-center justify-center bg-gray-50 p-8">
+          <div className="w-full max-w-md">
+            <div className="text-center lg:hidden mb-8">
+                <Package className="w-16 h-16 text-blue-800 mx-auto mb-4" />
+                <h1 className="text-3xl font-bold text-gray-900">NEXUM</h1>
+            </div>
+            
+            <h2 className="text-2xl font-semibold text-gray-800 mb-2">Bem-vindo de volta!</h2>
+            <p className="text-gray-500 mb-6">Insira suas credenciais para acessar o painel.</p>
+
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="seuemail@exemplo.com"
+                  className="bg-white"
+                />
+              </div>
+              <div>
+                <Label htmlFor="password">Senha</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
+                  required
+                  placeholder="Sua senha"
+                  className="bg-white"
+                />
+              </div>
+
+              {loginError && <p className="text-sm text-red-600 pt-1">{loginError}</p>}
+              
+              <Button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 h-10 text-base">
+                {loading ? 'Entrando...' : 'Entrar'}
+              </Button>
+            </form>
           </div>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
-            </div>
-            <div>
-              <Label htmlFor="password">Senha</Label>
-              <Input id="password" type="password" value={senha} onChange={e => setSenha(e.target.value)} required />
-            </div>
-            {loginError && <p className="text-sm text-red-600">{loginError}</p>}
-            <Button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700">
-              {loading ? 'Entrando...' : 'Entrar'}
-            </Button>
-          </form>
         </div>
       </div>
     );
@@ -211,9 +225,6 @@ export default function App() {
           {isSidebarCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
         </button>
 
-        {/* ====================================================================== */}
-        {/* =================== CÓDIGO DA NAVEGAÇÃO RESTAURADO =================== */}
-        {/* ====================================================================== */}
         <nav className="flex-1 p-4 space-y-2">
           {[
             { id: "inventory", label: "Estoque Completo", icon: Package },
@@ -224,13 +235,7 @@ export default function App() {
             <button
               key={id}
               onClick={() => setActiveView(id as ViewType)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors w-full ${
-                isSidebarCollapsed ? "justify-center" : "text-left"
-              } ${
-                activeView === id
-                  ? "bg-blue-800 text-white"
-                  : "hover:bg-blue-800 text-blue-100"
-              }`}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors w-full ${isSidebarCollapsed ? "justify-center" : "text-left"} ${activeView === id ? "bg-blue-800 text-white" : "hover:bg-blue-800 text-blue-100"}`}
               title={isSidebarCollapsed ? label : ""}
             >
               <Icon className="w-5 h-5 flex-shrink-0" />
@@ -238,9 +243,6 @@ export default function App() {
             </button>
           ))}
         </nav>
-        {/* ====================================================================== */}
-        {/* =========================== FIM DA CORREÇÃO ========================== */}
-        {/* ====================================================================== */}
 
         <div className="p-4 border-t border-blue-800 space-y-2">
           <button onClick={() => setActiveView("settings")} className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors w-full ${isSidebarCollapsed ? "justify-center" : "text-left"} ${activeView === "settings" ? "bg-blue-800 text-white" : "hover:bg-blue-800 text-blue-100"}`}>
