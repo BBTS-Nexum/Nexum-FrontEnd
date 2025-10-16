@@ -1,5 +1,4 @@
 // The file `c:\Users\jotaa\OneDrive\Documentos\Vscode\Nexum\Nexum-FrontEnd2\src\components\mockSupplierData.ts` exists, but is empty
-
 export const mockSupplierData = [
 	{
 		id: 1,
