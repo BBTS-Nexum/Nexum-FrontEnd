@@ -52,24 +52,23 @@ type ViewType =
   | "settings";
 
 // Função Helper para converter o Produto da API para o formato do Frontend
-// Esta função agora é mais segura e previne erros de dados ausentes
 const mapProdutoToInventoryItem = (produto: Produto): InventoryItem => {
   return {
     id_item: produto.id,
-    codigo_item: produto.codigo || '', // Garante que seja uma string
-    descricao_item: produto.descricao || '', // Garante que seja uma string
-    categoria: produto.tipo || 'Não definida', // Garante que tenha um valor
+    codigo_item: produto.codigo || '',
+    descricao_item: produto.descricao || '',
+    categoria: produto.tipo || 'Não definida',
     unidade_medida: produto.unidade_medida || 'UN',
-    estoque_atual: produto.saldo_total || 0, // Garante que seja um número
-    estoque_minimo: 50, // Padrão, já que a API não fornece
-    estoque_maximo: 200, // Padrão, já que a API não fornece
+    estoque_atual: produto.saldo_total || 0,
+    estoque_minimo: 50, // Padrão
+    estoque_maximo: 200, // Padrão
     consumo_medio_mensal: produto.cmm || 0,
-    consumo_ultimo_mes: 0, // Padrão, já que a API não fornece
-    consumo_tendencia: 'estavel', // Lógica a ser implementada se necessário
+    consumo_ultimo_mes: 0, // Padrão
+    consumo_tendencia: 'estavel',
     cobertura_em_dias: produto.cobertura || 0,
     previsao_reposicao: "A definir",
     quantidade_ideal_compra: 0,
-    status_critico: (produto.status || 'normal').toLowerCase() as InventoryItem['status_critico'], // Garante que o status exista e seja minúsculo
+    status_critico: (produto.status || 'normal').toLowerCase() as InventoryItem['status_critico'],
     localizacao_estoque: produto.localizacao || 'N/A',
     em_transito: produto.em_transito || 0,
     reservado: produto.reservado || 0,
@@ -79,15 +78,14 @@ const mapProdutoToInventoryItem = (produto: Produto): InventoryItem => {
   };
 };
 
-
 export default function App() {
-  // Estados de Autenticação e Dados da API
+  // Estados de Autenticação e Dados
   const [token, setToken] = useState<string | null>(localStorage.getItem('authToken'));
-  const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]); 
+  const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [dataError, setDataError] = useState<string | null>(null);
-  
+
   // Estados de UI e Formulários
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
@@ -97,7 +95,7 @@ export default function App() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isChatCollapsed, setIsChatCollapsed] = useState(false);
-  
+
   // Lógica de Login e Logout
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,16 +111,16 @@ export default function App() {
       setLoading(false);
     }
   };
-  
+
   const handleLogout = () => {
     if (confirm("Tem certeza que deseja sair?")) {
       localStorage.removeItem('authToken');
       setToken(null);
-      setInventoryData([]); // Limpa os dados ao sair
+      setInventoryData([]);
     }
   };
 
-  // Efeito para buscar dados da API quando o token existir
+  // Efeito para buscar dados da API
   useEffect(() => {
     if (token) {
       const fetchProducts = async () => {
@@ -134,7 +132,6 @@ export default function App() {
           setInventoryData(itemsFormatados);
         } catch (error: any) {
           setDataError(error.message);
-          // Se o token for inválido, desloga o usuário
           if (error.message.includes('inválido')) {
             handleLogout();
           }
@@ -144,42 +141,29 @@ export default function App() {
       };
       fetchProducts();
     } else {
-        setLoading(false); // Garante que o loading pare se não houver token
+      setLoading(false);
     }
   }, [token]);
 
-  // Lógica de filtro mais robusta para prevenir erros
+  // Lógica de filtro robusta
   const filteredData = inventoryData.filter((item) => {
-    // Garante que o item existe antes de tentar acessar suas propriedades
-    if (!item) {
-        return false;
-    }
-
+    if (!item) return false;
     const matchesSearch =
       (item.descricao_item || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (item.codigo_item || '').toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesCategory =
-      categoryFilter === "all" || item.categoria === categoryFilter;
-      
-    const matchesStatus =
-      statusFilter === "all" || item.status_critico === statusFilter;
-      
+    const matchesCategory = categoryFilter === "all" || item.categoria === categoryFilter;
+    const matchesStatus = statusFilter === "all" || item.status_critico === statusFilter;
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
-  // Funções de CRUD (Create, Remove)
-  // TODO: Implementar a lógica de API para estas funções
-  const handleAddItem = () => { /* setIsAddDialogOpen(true) */ alert("Funcionalidade a ser implementada."); };
+  const handleAddItem = () => alert("Funcionalidade a ser implementada.");
   const handleRemoveItem = (id: number) => {
     if (confirm("Tem certeza que deseja remover este item?")) {
       setInventoryData((prev) => prev.filter((item) => item.id_item !== id));
-      // Exemplo de como seria a chamada da API:
-      // deleteProduct(token, id).catch(err => console.error(err));
     }
   };
 
-  // Renderização condicional: Tela de Login se não houver token
+  // Renderização condicional: Tela de Login
   if (!token) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-100">
@@ -210,7 +194,6 @@ export default function App() {
   // Renderização Principal (Dashboard)
   return (
     <div className="flex h-screen bg-gray-50">
-      {/* Sidebar */}
       <aside className={`${isSidebarCollapsed ? "w-16" : "w-64"} bg-blue-900 text-white flex flex-col transition-all duration-300 relative`}>
         <div className="p-6 border-b border-blue-800">
           <div className="flex items-center gap-3">
@@ -228,9 +211,36 @@ export default function App() {
           {isSidebarCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
         </button>
 
+        {/* ====================================================================== */}
+        {/* =================== CÓDIGO DA NAVEGAÇÃO RESTAURADO =================== */}
+        {/* ====================================================================== */}
         <nav className="flex-1 p-4 space-y-2">
-          {/* Botões do menu de navegação */}
+          {[
+            { id: "inventory", label: "Estoque Completo", icon: Package },
+            { id: "purchase-requests", label: "Requisições de Compras", icon: ShoppingCart },
+            { id: "purchase-history", label: "Histórico de Compras", icon: History },
+            { id: "suggestions", label: "Sugestões de Compras", icon: Lightbulb },
+          ].map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => setActiveView(id as ViewType)}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors w-full ${
+                isSidebarCollapsed ? "justify-center" : "text-left"
+              } ${
+                activeView === id
+                  ? "bg-blue-800 text-white"
+                  : "hover:bg-blue-800 text-blue-100"
+              }`}
+              title={isSidebarCollapsed ? label : ""}
+            >
+              <Icon className="w-5 h-5 flex-shrink-0" />
+              {!isSidebarCollapsed && <span>{label}</span>}
+            </button>
+          ))}
         </nav>
+        {/* ====================================================================== */}
+        {/* =========================== FIM DA CORREÇÃO ========================== */}
+        {/* ====================================================================== */}
 
         <div className="p-4 border-t border-blue-800 space-y-2">
           <button onClick={() => setActiveView("settings")} className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors w-full ${isSidebarCollapsed ? "justify-center" : "text-left"} ${activeView === "settings" ? "bg-blue-800 text-white" : "hover:bg-blue-800 text-blue-100"}`}>
@@ -244,12 +254,8 @@ export default function App() {
         </div>
       </aside>
 
-      {/* Conteúdo Principal */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {activeView === "inventory" && (
-            // A lógica da tela de inventário foi movida para seu próprio componente (InventoryView) 
-            // para manter este arquivo limpo, mas mantendo a arquitetura, vamos deixar aqui.
-            // O ideal seria componentizar, mas respeitando a sua decisão:
           <>
             <header className="bg-white border-b border-gray-200 px-8 py-4">
               <div className="flex items-center justify-between">
@@ -270,7 +276,6 @@ export default function App() {
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                       <Input placeholder="Buscar por descrição ou código..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10 bg-white" />
                   </div>
-                  {/* Filtros */}
               </div>
             </div>
             
@@ -290,7 +295,6 @@ export default function App() {
         {activeView === "settings" && <div className="p-8"><SettingsComponent /></div>}
       </main>
       
-      {/* Chat Assistant */}
       {!isChatCollapsed && <ChatAssistant onToggle={() => setIsChatCollapsed(true)} />}
       {isChatCollapsed && (
         <button onClick={() => setIsChatCollapsed(false)} className="fixed right-0 top-1/2 -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-6 rounded-l-lg shadow-lg">
